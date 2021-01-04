@@ -1,0 +1,11 @@
+{
+  "changes": [
+    {
+      "packageName": "@bentley/itwin-react-hooks",
+      "comment": "renamed imodel-react-hooks package to itwin-react-hooks",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@bentley/itwin-react-hooks",
+  "email": "16315257+MichaelBelousov@users.noreply.github.com"
+}
