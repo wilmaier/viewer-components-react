@@ -1,5 +1,7 @@
 # iModel.js React Hooks
 
+*Warning:* This package has been deprecated (renamed really). Use `@bentley/itwin-react-hooks` instead.
+
 ### Description
 
 React hooks for low-overhead and idiomatic imodeljs usage in React where appropriate.
