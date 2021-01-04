@@ -1,4 +1,4 @@
-# iModel.js React Hooks
+# iTwin.js React Hooks
 
 ### Description
 
@@ -70,7 +70,7 @@ heavy-duty markers, and other iModel.js subclass-style APIs should prefer this t
 
 ```tsx
 import React from "react";
-import { IModelJsViewProvider, useMarker } from "@bentley/imodel-react-hooks";
+import { IModelJsViewProvider, useMarker } from "@bentley/itwin-react-hooks";
 import mySvgUrl from "my.svg";
 import { Point2d } from "@bentley/geometry-core";
 
@@ -155,7 +155,7 @@ import React, { useState } from "react";
 import {
   FeatureOverrideReactProvider,
   useFeatureOverrides,
-} from "@bentley/imodel-react-hooks";
+} from "@bentley/itwin-react-hooks";
 import { FeatureSymbology } from "@bentley/imodeljs-frontend";
 import { RgbColor } from "@bentley/imodeljs-common";
 import { myAppState, C } from "./appState";

@@ -23,6 +23,6 @@
 
 /packages/imodel-content-tree  @grigasp @imodeljs/viewer-components-reviewers
 
-/packages/imodel-react-hooks @michaelbelousov @imodeljs/viewer-components-reviewers
+/packages/itwin-react-hooks @michaelbelousov @imodeljs/viewer-components-reviewers
 
 /packages/geo-tools @mdastous-bentley @imodeljs/viewer-components-reviewers

@@ -1,5 +1,5 @@
 {
-  "name": "@bentley/imodel-react-hooks",
+  "name": "@bentley/itwin-react-hooks",
   "version": "0.1.2",
   "description": "Reusable React Hooks to help with iModel.js",
   "keywords": [
@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/imodel-react-hooks"
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/itwin-react-hooks"
   },
   "license": "MIT",
   "author": {

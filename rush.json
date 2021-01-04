@@ -42,9 +42,9 @@
       "versionPolicyName": "imodel-content-tree"
     },
     {
-      "packageName": "@bentley/imodel-react-hooks",
-      "projectFolder": "packages/imodel-react-hooks",
-      "versionPolicyName": "imodel-react-hooks"
+      "packageName": "@bentley/itwin-react-hooks",
+      "projectFolder": "packages/itwin-react-hooks",
+      "versionPolicyName": "itwin-react-hooks"
     },
     {
       "packageName": "@bentley/geo-tools-react",
