@@ -296,6 +296,7 @@ importers:
       '@bentley/geometry-core': ^2.0.0
       '@bentley/imodeljs-common': ^2.0.0
       '@bentley/imodeljs-frontend': ^2.0.0
+      '@bentley/react-hooks': ~1.2.0
       '@testing-library/react': ^9.1.4
       '@types/jest': ^24.9.0
       '@types/react': ~16.9.35
@@ -309,6 +310,8 @@ importers:
       rimraf: ^3.0.2
       ts-jest: ^26.1.1
       typescript: ^3.9.2
+    dependencies:
+      '@bentley/react-hooks': 1.2.0_react@16.14.0
     devDependencies:
       '@bentley/bentleyjs-core': 2.19.6
       '@bentley/geometry-core': 2.19.6_@bentley+bentleyjs-core@2.19.6
@@ -4173,6 +4176,14 @@ packages:
       '@bentley/bentleyjs-core': 2.19.6
       '@bentley/itwin-client': 2.19.6_@bentley+bentleyjs-core@2.19.6
     dev: true
+
+  /@bentley/react-hooks/1.2.0_react@16.14.0:
+    resolution: {integrity: sha512-4ZnJ97vhA80gFN7Fvb7M/iWaVXM14O58qLs0Qbyu47AgtkeWH2SRpwZFOF5vCdeoLtyaIs9WkguxoiVtT5qBCA==}
+    peerDependencies:
+      react: ^16.13.0
+    dependencies:
+      react: 16.14.0
+    dev: false
 
   /@bentley/react-scripts/3.4.6_typescript@3.7.7:
     resolution: {integrity: sha512-lFxmClVnb6XoqPlB39YS/FfzwDfLytCrAo5pm8qrLuKQyM3dCKor1ov3F1UAMrDjX5DpB8UVfBodR/rPViNWTQ==}

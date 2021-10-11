@@ -7,18 +7,10 @@ import { XAndY, XYAndZ } from "@bentley/geometry-core";
 import { Marker } from "@bentley/imodeljs-frontend";
 import React, { useContext, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
+import { useClass } from "@bentley/react-hooks";
 
 import { MarkerDecorationContext } from "../IModelJsViewProvider";
 import { useOnMountInRenderOrder } from "../utils/basic-hooks";
-
-function useClass<C extends new (...args: any[]) => any, S extends {}>(
-  makeClass: (s: S) => C,
-  dependencies: S = {} as S
-): C {
-  const stateRef = useRef({} as S).current;
-  Object.assign(stateRef, dependencies);
-  return useRef(makeClass(stateRef)).current;
-}
 
 /** a marker with which you can set the `jsxElement` property to JSX instead of the `htmlElement`
  * this makes it easy to use JSX fragments for dynamic react-controlled marker content like so:
@@ -82,7 +74,7 @@ export const useMarker = <
 >(
   makeClass: (s: S) => C = () => JsxMarker as any as C,
   worldLocation: XYAndZ = { x: 0, y: 0, z: 0 },
-  size: XAndY = { x: 0, y: 0 },
+  size: XAndY = { x: 30, y: 30 },
   dependencies: S = {} as S
 ) => {
   const marker = new (useClass(makeClass, dependencies))(worldLocation, size);
@@ -134,5 +126,24 @@ export const useMarker = <
 
   return marker;
 };
+
+export function MarkerComponent<
+  C extends new (...args: any[]) => Marker,
+  S extends {}
+>(props: {
+  makeClass?: (s: S) => C;
+  worldLocation?: XYAndZ;
+  size?: XAndY;
+  dependencies?: S;
+}) {
+  const useStable = <T extends any>(t: T) => useRef(t).current;
+  useMarker(
+    props.makeClass ?? useStable(() => JsxMarker as any as C),
+    props.worldLocation ?? useStable({ x: 0, y: 0, z: 0 }),
+    props.size ?? useStable({ x: 30, y: 30 }),
+    props.dependencies ?? useStable({} as S)
+  );
+  return null;
+}
 
 export default useMarker;

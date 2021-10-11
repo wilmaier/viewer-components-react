@@ -75,5 +75,8 @@
     "@bentley/imodeljs-frontend": "^2.0.0",
     "react": "^16.13.0",
     "react-dom": "^16.13.0"
+  },
+  "dependencies": {
+    "@bentley/react-hooks": "~1.2.0"
   }
 }
