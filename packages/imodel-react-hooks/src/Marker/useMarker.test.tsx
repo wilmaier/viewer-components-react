@@ -3,8 +3,8 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 
-import { Point3d } from "@bentley/geometry-core";
-import { Viewport } from "@bentley/imodeljs-frontend";
+import { Point2d, Point3d } from "@bentley/geometry-core";
+import { Marker, Viewport } from "@bentley/imodeljs-frontend";
 import { render } from "@testing-library/react";
 import React, { useContext } from "react";
 
@@ -13,7 +13,7 @@ import {
   MarkerDecoration,
   MarkerDecorationContext,
 } from "../IModelJsViewProvider";
-import { IModelJsMarker, useMarker } from "./useMarker";
+import { useMarker } from "./useMarker";
 
 jest.mock("@bentley/bentleyjs-core");
 
@@ -26,7 +26,7 @@ jest.mock("@bentley/imodeljs-frontend", () => {
         __vp: {},
         addDecorator: jest.fn(),
         forEachViewport(func: (vp: Viewport) => void) {
-          func((this.__vp as any) as Viewport);
+          func(this.__vp as any as Viewport);
         },
         invalidateViewportScenes: jest.fn(),
         onViewOpen: {
@@ -38,24 +38,21 @@ jest.mock("@bentley/imodeljs-frontend", () => {
   };
 });
 
-const dontCareMarkerOpts = {
-  worldLocation: Point3d.create(0, 0, 0),
-  size: [30, 30] as [number, number],
-};
+const dontCareMarkerOpts = [
+  Point3d.create(0, 0, 0),
+  Point2d.create(30, 30),
+] as const;
 
 describe("Hook useMarker", () => {
   it("markers are applied in tree order", async () => {
-    let markers: IModelJsMarker[];
+    let markers: Marker[];
     const ListenContext = () => {
       const { decoration } = useContext(MarkerDecorationContext);
-      markers = ((decoration as MarkerDecoration) as any)._markersRef;
+      markers = (decoration as MarkerDecoration as any)._markersRef;
       return null;
     };
     const A = () => {
-      useMarker({
-        ...dontCareMarkerOpts,
-        size: { x: 1, y: 0 },
-      });
+      useMarker(() => Marker, dontCareMarkerOpts[0], Point2d.create(1, 0));
       return (
         <>
           <B /> <C />
@@ -63,17 +60,11 @@ describe("Hook useMarker", () => {
       );
     };
     const B = () => {
-      useMarker({
-        ...dontCareMarkerOpts,
-        size: { x: 2, y: 0 },
-      });
+      useMarker(() => Marker, dontCareMarkerOpts[0], Point2d.create(2, 0));
       return null;
     };
     const C = () => {
-      useMarker({
-        ...dontCareMarkerOpts,
-        size: { x: 3, y: 0 },
-      });
+      useMarker(() => Marker, dontCareMarkerOpts[0], Point2d.create(3, 0));
       return null;
     };
     render(

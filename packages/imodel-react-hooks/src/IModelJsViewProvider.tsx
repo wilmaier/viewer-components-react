@@ -1,17 +1,17 @@
 /*---------------------------------------------------------------------------------------------
- * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
- * See LICENSE.md in the project root for license terms and full copyright notice.
- *--------------------------------------------------------------------------------------------*/
+* Copyright (c) Bentley Systems, Incorporated. All rights reserved.
+* See LICENSE.md in the project root for license terms and full copyright notice.
+*--------------------------------------------------------------------------------------------*/
 
 import {
   DecorateContext,
   Decorator,
   IModelApp,
+  Marker,
   Viewport,
 } from "@bentley/imodeljs-frontend";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { IModelJsMarker } from "./Marker";
 import { makeContextWithProviderRequired } from "./utils";
 
 /**
@@ -20,26 +20,27 @@ import { makeContextWithProviderRequired } from "./utils";
  */
 export interface MarkerDecorationContext {
   decoration: Decorator;
-  register: (m: IModelJsMarker) => void;
-  unregister: (m: IModelJsMarker) => void;
-  refreshPosition: (m: IModelJsMarker) => void;
+  register: (m: Marker) => void;
+  unregister: (m: Marker) => void;
+  refreshPosition: (m: Marker) => void;
   enqueueViewInvalidation: () => void;
 }
 
-export const MarkerDecorationContext = makeContextWithProviderRequired<MarkerDecorationContext>(
-  "MarkerDecorationContext"
-);
+export const MarkerDecorationContext =
+  makeContextWithProviderRequired<MarkerDecorationContext>(
+    "MarkerDecorationContext"
+  );
 
 const isViewportValidForDecorations = (v: Viewport) =>
   "invalidateDecorations" in v;
 
 /** @internal */
 export class MarkerDecoration implements Decorator {
-  private _markersRef: readonly IModelJsMarker[];
+  private _markersRef: readonly Marker[];
   public viewFilter: (vp: Viewport) => boolean;
 
   public constructor(
-    markersRef: readonly IModelJsMarker[],
+    markersRef: readonly Marker[],
     inViewFilter?: (vp: Viewport) => boolean
   ) {
     this._markersRef = markersRef;
@@ -61,7 +62,7 @@ export const IModelJsViewProvider = ({
   children,
   viewFilter,
 }: IModelJsViewProviderProps) => {
-  const markers = useRef<IModelJsMarker[]>([]);
+  const markers = useRef<Marker[]>([]);
 
   const decoratorInstance = useMemo(
     () => new MarkerDecoration(markers.current, viewFilter),
@@ -83,14 +84,13 @@ export const IModelJsViewProvider = ({
   const enqueueViewInvalidation = useCallback(
     () =>
       setTimeout(() => {
-        IModelApp.viewManager.forEachViewport((vp) => {
+        for (const vp of IModelApp.viewManager)
           if (viewFilter?.(vp) ?? true) vp.invalidateDecorations();
-        })
       }),
     []
   );
 
-  const register = useCallback((toAdd: IModelJsMarker) => {
+  const register = useCallback((toAdd: Marker) => {
     markers.current.push(toAdd);
   }, []);
 
@@ -99,7 +99,7 @@ export const IModelJsViewProvider = ({
    * A better implementation would be a separate "registered set" and "order list"
    * and the order list can be push only and cleared at the end of the tree render
    */
-  const refreshPosition = useCallback((toRefresh: IModelJsMarker) => {
+  const refreshPosition = useCallback((toRefresh: Marker) => {
     const index = markers.current.findIndex((m) => m === toRefresh);
     if (index > -1) {
       markers.current.splice(index, 1);
@@ -107,7 +107,7 @@ export const IModelJsViewProvider = ({
     }
   }, []);
 
-  const unregister = useCallback((toRemove: IModelJsMarker) => {
+  const unregister = useCallback((toRemove: Marker) => {
     const index = markers.current.findIndex((m) => m === toRemove);
     if (index > -1) {
       markers.current.splice(index, 1);
