@@ -127,23 +127,4 @@ export const useMarker = <
   return marker;
 };
 
-export function MarkerComponent<
-  C extends new (...args: any[]) => Marker,
-  S extends {}
->(props: {
-  makeClass?: (s: S) => C;
-  worldLocation?: XYAndZ;
-  size?: XAndY;
-  dependencies?: S;
-}) {
-  const useStable = <T extends any>(t: T) => useRef(t).current;
-  useMarker(
-    props.makeClass ?? useStable(() => JsxMarker as any as C),
-    props.worldLocation ?? useStable({ x: 0, y: 0, z: 0 }),
-    props.size ?? useStable({ x: 30, y: 30 }),
-    props.dependencies ?? useStable({} as S)
-  );
-  return null;
-}
-
 export default useMarker;
