@@ -18,6 +18,7 @@ import {
 import type { GroupType } from "./Grouping";
 import "./PropertyMenu.scss";
 import GroupPropertyAction from "./GroupPropertyAction";
+import GroupPropertyValidateAction from "./GroupPropertyValidateAction";
 import CalculatedPropertyAction from "./CalculatedPropertyAction";
 import type { GroupPropertyType } from "./GroupPropertyTable";
 import GroupPropertyTable from "./GroupPropertyTable";
@@ -58,6 +59,7 @@ interface PropertyModifyProps {
 export enum PropertyMenuView {
   DEFAULT = "default",
   ADD_GROUP_PROPERTY = "add_group_property",
+  VALIDATE_GROUP_PROPERTY = "validate_group_property",
   MODIFY_GROUP_PROPERTY = "modify_group_property",
   ADD_CALCULATED_PROPERTY = "add_calculated_property",
   MODIFY_CALCULATED_PROPERTY = "modify_calculated_property",
@@ -120,6 +122,14 @@ export const PropertyMenu = ({
     void initialize();
   }, [iModelConnection, group.query, goBack, group.groupName]);
 
+  const onGroupPropertyValidate = useCallback(
+    (value: CellProps<GroupPropertyType>) => {
+      setSelectedGroupProperty(value.row.original);
+      setPropertyMenuView(PropertyMenuView.VALIDATE_GROUP_PROPERTY);
+    },
+    [],
+  );
+
   const onGroupPropertyModify = useCallback(
     (value: CellProps<GroupPropertyType>) => {
       setSelectedGroupProperty(value.row.original);
@@ -168,6 +178,20 @@ export const PropertyMenu = ({
           mappingId={mappingId}
           groupId={group.id ?? ""}
           keySet={keySet ?? new KeySet()}
+          returnFn={async () => {
+            setPropertyMenuView(PropertyMenuView.DEFAULT);
+          }}
+        />
+      );
+    case PropertyMenuView.VALIDATE_GROUP_PROPERTY:
+      return (
+        <GroupPropertyValidateAction
+          iModelId={iModelId}
+          mappingId={mappingId}
+          groupId={group.id ?? ""}
+          keySet={keySet ?? new KeySet()}
+          groupPropertyId={selectedGroupProperty?.id ?? ""}
+          groupPropertyName={selectedGroupProperty?.propertyName ?? ""}
           returnFn={async () => {
             setPropertyMenuView(PropertyMenuView.DEFAULT);
           }}
@@ -251,6 +275,7 @@ export const PropertyMenu = ({
                   iModelId={iModelId}
                   mappingId={mappingId}
                   groupId={group.id ?? ""}
+                  onGroupPropertyValidate={onGroupPropertyValidate}
                   onGroupPropertyModify={onGroupPropertyModify}
                   setSelectedGroupProperty={setSelectedGroupProperty}
                   setGroupModifyView={setPropertyMenuView}

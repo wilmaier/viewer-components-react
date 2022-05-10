@@ -4,6 +4,7 @@
 *--------------------------------------------------------------------------------------------*/
 import {
   SvgAdd,
+  SvgCheckmark,
   SvgDelete,
   SvgEdit,
   SvgMore,
@@ -64,6 +65,7 @@ interface GroupPropertyTableProps {
   >
   >;
   setGroupModifyView: React.Dispatch<React.SetStateAction<PropertyMenuView>>;
+  onGroupPropertyValidate: (value: CellProps<GroupProperty>) => void;
   onGroupPropertyModify: (value: CellProps<GroupPropertyType>) => void;
   selectedGroupProperty?: GroupPropertyType;
 }
@@ -73,6 +75,7 @@ const GroupPropertyTable = ({
   mappingId,
   groupId,
   selectedGroupProperty,
+  onGroupPropertyValidate,
   onGroupPropertyModify,
   setSelectedGroupProperty,
   setGroupModifyView,
@@ -134,13 +137,20 @@ const GroupPropertyTable = ({
                   menuItems={(close: () => void) => [
                     <MenuItem
                       key={0}
+                      onClick={() => onGroupPropertyValidate(value)}
+                      icon={<SvgCheckmark />}
+                    >
+                      Validate
+                    </MenuItem>,
+                    <MenuItem
+                      key={1}
                       onClick={() => onGroupPropertyModify(value)}
                       icon={<SvgEdit />}
                     >
                       Modify
                     </MenuItem>,
                     <MenuItem
-                      key={1}
+                      key={2}
                       onClick={() => {
                         setSelectedGroupProperty(value.row.original);
                         setShowGroupPropertyDeleteModal(true);
@@ -167,7 +177,7 @@ const GroupPropertyTable = ({
         ],
       },
     ],
-    [onGroupPropertyModify, setSelectedGroupProperty],
+    [onGroupPropertyValidate, onGroupPropertyModify, setSelectedGroupProperty],
   );
 
   return (
