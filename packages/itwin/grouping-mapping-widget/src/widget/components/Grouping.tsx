@@ -49,7 +49,7 @@ import {
 } from "./viewerUtils";
 import { fetchIdsFromQuery, handleError, WidgetHeader } from "./utils";
 import GroupAction from "./GroupAction";
-import type { Group, Mapping } from "@itwin/insights-client";
+import type { Group } from "@itwin/insights-client";
 import { ReportingClient } from "@itwin/insights-client";
 import type { Api } from "./GroupingMapping";
 import { ApiContext } from "./GroupingMapping";
@@ -63,23 +63,35 @@ enum GroupsView {
   PROPERTIES = "properties",
 }
 
-interface GroupsTreeProps {
-  mapping: Mapping;
-  goBack: () => Promise<void>;
-}
-
 const fetchGroups = async (
   setGroups: React.Dispatch<React.SetStateAction<GroupType[]>>,
   iModelId: string,
-  mappingId: string,
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  mappingId: string | undefined,
+  setMappingId: React.Dispatch<React.SetStateAction<string | undefined>>,
   apiContext: Api
 ) => {
   try {
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(apiContext.prefix);
-    const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
-    setGroups(groups);
+    if (!mappingId) {
+      let mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
+      if (mappings.length == 0) {
+        const mappingContainer = await reportingClientApi.createMapping(apiContext.accessToken, iModelId, {
+          mappingName: "PropertyValidation",
+          description: "Property Validation",
+        });
+        if (mappingContainer && mappingContainer.mapping) {
+          setMappingId(mappingContainer.mapping.id);
+        }
+      } else {
+        setMappingId(mappings[0].id);
+      }
+    }
+    if (mappingId) {
+      const groups = await reportingClientApi.getGroups(apiContext.accessToken, iModelId, mappingId);
+      setGroups(groups);
+    }
   } catch (error: any) {
     handleError(error.status);
   } finally {
@@ -87,11 +99,12 @@ const fetchGroups = async (
   }
 };
 
-export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
+export const Groupings = () => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
   const iModelId = useActiveIModelConnection()?.iModelId as string;
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [mappingId, setMappingId] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [groupsView, setGroupsView] = useState<GroupsView>(GroupsView.GROUPS);
   const [selectedGroup, setSelectedGroup] = useState<GroupType | undefined>(
@@ -103,15 +116,15 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
   const [groups, setGroups] = useState<Group[]>([]);
 
   useEffect(() => {
-    void fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, iModelId, mapping.id, setIsLoading]);
+    void fetchGroups(setGroups, iModelId, setIsLoading, mappingId, setMappingId, apiContext);
+  }, [apiContext, iModelId, setIsLoading, mappingId, setMappingId]);
 
   const refresh = useCallback(async () => {
     setGroupsView(GroupsView.GROUPS);
     setSelectedGroup(undefined);
     setGroups([]);
-    await fetchGroups(setGroups, iModelId, mapping.id ?? "", setIsLoading, apiContext);
-  }, [apiContext, iModelId, mapping.id, setGroups]);
+    await fetchGroups(setGroups, iModelId, setIsLoading, mappingId, setMappingId, apiContext);
+  }, [apiContext, iModelId, setGroups, mappingId, setMappingId]);
 
   const addGroup = () => {
     // TODO Retain selection in view without emphasizes. Goal is to make it so we can distinguish
@@ -347,7 +360,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mappingId ?? ""}
           goBack={async () => {
             clearEmphasizedElements();
             setGroupsView(GroupsView.GROUPS);
@@ -359,7 +372,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <GroupAction
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mappingId ?? ""}
           group={selectedGroup}
           goBack={async () => {
             clearEmphasizedElements();
@@ -372,7 +385,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return selectedGroup ? (
         <PropertyMenu
           iModelId={iModelId}
-          mappingId={mapping.id ?? ""}
+          mappingId={mappingId ?? ""}
           group={selectedGroup}
           goBack={propertyMenuGoBack}
         />
@@ -381,12 +394,8 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
       return (
         <>
           <WidgetHeader
-            title={mapping.mappingName ?? ""}
+            title="Property Validation"
             disabled={isLoading || isLoadingQuery}
-            returnFn={async () => {
-              clearEmphasizedElements();
-              await goBack();
-            }}
           />
           <div className='groups-container'>
             <Button
@@ -422,7 +431,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               await reportingClientApi.deleteGroup(
                 apiContext.accessToken,
                 iModelId,
-                mapping.id ?? "",
+                mappingId ?? "",
                 selectedGroup?.id ?? "",
               );
             }}
