@@ -110,7 +110,7 @@ const ValidateResultsTable = ({
         data={validateResults ? validateResults.result : []}
         density='extra-condensed'
         columns={validateResultColumns}
-        emptyTableContent='No Validation Failures'
+        emptyTableContent='No Results'
         isSortable
         isLoading={isLoading}
         stateReducer={tableStateSingleSelectReducer}

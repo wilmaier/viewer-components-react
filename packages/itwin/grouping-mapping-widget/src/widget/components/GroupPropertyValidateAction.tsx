@@ -68,19 +68,19 @@ interface GroupPropertyValidateActionProps {
 }
 
 export const validationTypeSelectionOptions: SelectOption<string>[] = [
-  { value: "PropertyValueRange", label: "Range" },
-  { value: "PropertyValueAtMost", label: "Upper Bound" },
-  { value: "PropertyValueAtLeast", label: "Lower Bound" },
-  { value: "PropertyValuePattern", label: "Pattern" },
-  { value: "PropertyValueDefined", label: "Value Set" },
+  { value: "PropertyValueRange", label: "Within Range" },
+  { value: "PropertyValueAtMost", label: "Value At Most" },
+  { value: "PropertyValueAtLeast", label: "Value At Least" },
+  { value: "PropertyValueDefined", label: "Value Is Set" },
   { value: "PropertyValueUnique", label: "Value Unique" },
-  { value: "PropertyValueCountAtLeast", label: "Count Elements Above Lower Bound" },
-  { value: "PropertyValueCountAtMost", label: "Count Elements Below Upper Bound" },
-  { value: "PropertyValueCountRange", label: "Count Elements in Range" },
-  { value: "PropertyValueSumAtLeast", label: "Sum Values Above Lower Bound" },
-  { value: "PropertyValueSumAtMost", label: "Sum Values Below Upper Bound" },
-  { value: "PropertyValueSumRange", label: "Sum Values in Range" },
-  { value: "PropertyValuePercentAvailable", label: "Percent of Elements With Property Set" },
+  { value: "PropertyValueSumAtLeast", label: "Value Sum At Least" },
+  { value: "PropertyValueSumAtMost", label: "Value Sum At Most" },
+  { value: "PropertyValueSumRange", label: "Value Sum in Range" },
+  { value: "PropertyValueCountAtLeast", label: "Element Count At Least" },
+  { value: "PropertyValueCountAtMost", label: "Element Count At Most" },
+  { value: "PropertyValueCountRange", label: "Element Count in Range" },
+  { value: "PropertyValuePattern", label: "Matches Pattern" },
+  { value: "PropertyValuePercentAvailable", label: "Percent of Elements Where Value Is Set" },
 ];
 interface Property {
   name: string;
@@ -469,6 +469,20 @@ const GroupPropertyValidateAction = ({
   const showUpperBound = new Set<string>(
     ["PropertyValueRange", "PropertyValueCountRange", "PropertyValueSumRange", "PropertyValueAtMost", "PropertyValueCountAtMost", "PropertyValueSumAtMost"]
   );
+  const showMeters = new Set<string>(
+    ["PropertyValueRange", "PropertyValueSumRange", "PropertyValueAtMost", "PropertyValueSumAtMost", "PropertyValueAtLeast", "PropertyValueSumAtLeast"]
+    );
+  const metersLabel = showMeters.has(validationType) ? " (in meters)" : "";
+  const lowerBoundLabel = "Lower Limit" + metersLabel;
+  const upperBoundLabel = "Upper Limit" + metersLabel;
+
+  let resultTitle = "Result";
+  if (validationType !== "PropertyValuePercentAvailable") {
+    resultTitle = "Failures";
+    if (validateResults) {
+      resultTitle += " (" + validateResults.result.length + ")";
+    }
+  }
 
   return (
     <>
@@ -477,7 +491,7 @@ const GroupPropertyValidateAction = ({
         returnFn={returnFn}
       />
       <div className='group-property-validate-action-container'>
-        <Fieldset className='property-options' legend='Validation Details'>
+        <Fieldset className='property-options' legend='Validation Criteria'>
           <Small className='field-legend'>
             Asterisk * indicates mandatory fields.
           </Small>
@@ -494,7 +508,7 @@ const GroupPropertyValidateAction = ({
           {showLowerBound.has(validationType) &&
             <LabeledInput
               id='lowerBound'
-              label='Lower Bound'
+              label={lowerBoundLabel}
               value={lowerBound}
               required
               disabled={isLoading}
@@ -506,7 +520,7 @@ const GroupPropertyValidateAction = ({
           {showUpperBound.has(validationType) &&
             <LabeledInput
               id='upperBound'
-              label='Upper Bound'
+              label={upperBoundLabel}
               value={upperBound}
               required
               disabled={isLoading}
@@ -526,7 +540,6 @@ const GroupPropertyValidateAction = ({
               }}
             />
           }
-          {/* TODO: Disable when no properties are selected. Will do when I rework property selection. */}
           <ValidateActionPanel
             onValidate={onValidate}
             onCancel={returnFn}
@@ -537,7 +550,7 @@ const GroupPropertyValidateAction = ({
               (validationType === "PropertyValuePattern" && !pattern)}
           />
           <Fieldset className='property-options'>
-            <legend>Failures {validateResults ? '('+validateResults.result.length+')': ''}</legend>
+            <legend>{resultTitle}</legend>
             <ValidateResultsTable
               validateResults={validateResults}
               isLoading={isLoading}
