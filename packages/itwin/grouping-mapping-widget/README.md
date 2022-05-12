@@ -1,8 +1,8 @@
-# @itwin/grouping-mapping-widget
+# @itwin/property-validation-widget
 
 Copyright © Bentley Systems, Incorporated. All rights reserved.
-The Grouping Mapping widget is a UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Reporting Platform APIs](https://developer.bentley.com/apis/insights/overview/).
-The grouping-mapping-widget package provides a UiProvider class - `GroupingMappingProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
+The Property Validation widget is a UI component for iTwin Viewer applications that simplifies how users (and developers) interface with the [Validation Platform APIs](https://developer.bentley.com/apis/validation/overview/).
+The property-validation-widget package provides a UiProvider class - `PropertyValidationProvider` - which can be passed into the `uiProviders` prop of the iTwin Viewer's `<Viewer />` component.
 
 ## Getting Started
 
@@ -17,15 +17,17 @@ The SPA client used by your iTwin viewer must have these additional scopes:
 - `insights:read`
 - `insights:modify`
 - `projects:read`
+- `validation:read`
+- `validation:modify`
 
 In addition, users must have the `imodels_read` and `imodels_write` [permissions](https://developer.bentley.com/apis/insights/operations/create-mapping/#authorization) assigned at either the Project or iModel level. Further instruction on how to create roles and assign permissions can be found in the [iTwin Platform Projects API documentation](https://developer.bentley.com/apis/projects/tutorials/).
 
 ## Sample usage
 
 ```tsx
-import { GroupingMappingProvider } from "@itwin/grouping-mapping-widget";
+import { PropertyValidationProvider } from "@itwin/property-validation-widget";
 <Viewer
   ...
-  uiProviders={[new GroupingMappingProvider()]}
+  uiProviders={[new PropertyValidationProvider()]}
 />
 ```

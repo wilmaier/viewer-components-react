@@ -16,8 +16,8 @@ import type { AccessToken } from "@itwin/core-bentley";
 import React from "react";
 import GroupingMapping from "./components/GroupingMapping";
 
-export class GroupingMappingProvider implements UiItemsProvider {
-  public readonly id = "GroupingMappingProvider";
+export class PropertyValidationProvider implements UiItemsProvider {
+  public readonly id = "PropertyValidationProvider";
 
   private readonly _accessToken?: AccessToken;
   private readonly _prefix?: "" | "dev" | "qa";
@@ -41,15 +41,15 @@ export class GroupingMappingProvider implements UiItemsProvider {
         stageUsage === StageUsage.General) ||
       zonelocation === AbstractZoneLocation.CenterLeft
     ) {
-      const GroupingMappingWidget: AbstractWidgetProps = {
-        id: "GroupingMappingWidget",
-        label: "Grouping & Mapping",
+      const PropertyValidationWidget: AbstractWidgetProps = {
+        id: "PropertyValidationWidget",
+        label: "Property Validation",
         getWidgetContent: () => {
           return <GroupingMapping accessToken={this._accessToken} prefix={this._prefix} />;
         },
       };
 
-      widgets.push(GroupingMappingWidget);
+      widgets.push(PropertyValidationWidget);
     }
 
     return widgets;

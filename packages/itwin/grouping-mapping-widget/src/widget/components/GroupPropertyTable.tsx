@@ -189,7 +189,7 @@ const GroupPropertyTable = ({
           setGroupModifyView(PropertyMenuView.ADD_GROUP_PROPERTY);
         }}
       >
-        Add Property
+        Add Validation Property
       </Button>
       <Table<GroupPropertyType>
         data={groupProperties}

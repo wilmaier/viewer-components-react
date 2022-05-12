@@ -28,9 +28,9 @@
       "versionPolicyName": "itwin-geo-tools"
     },
     {
-      "packageName": "@itwin/grouping-mapping-widget",
+      "packageName": "@itwin/property-validation-widget",
       "projectFolder": "packages/itwin/grouping-mapping-widget",
-      "versionPolicyName": "grouping-mapping-widget"
+      "versionPolicyName": "property-validation-widget"
     },
     {
       "packageName": "@itwin/one-click-lca-react",

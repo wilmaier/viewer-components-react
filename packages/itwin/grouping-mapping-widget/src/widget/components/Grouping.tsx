@@ -140,7 +140,7 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
         columns: [
           {
             id: "groupName",
-            Header: "Group",
+            Header: "Validation Group",
             accessor: "groupName",
             Cell: (value: CellProps<GroupType>) => (
               <>
@@ -397,13 +397,13 @@ export const Groupings = ({ mapping, goBack }: GroupsTreeProps) => {
               disabled={isLoadingQuery}
               onClick={() => addGroup()}
             >
-              {isLoadingQuery ? "Loading Group(s)" : "Add Group"}
+              {isLoadingQuery ? "Loading Validation Group(s)" : "Add Validation Group"}
             </Button>
             <Table<GroupType>
               data={groups}
               density='extra-condensed'
               columns={groupsColumns}
-              emptyTableContent='No Groups available.'
+              emptyTableContent='No Validation Groups available.'
               isSortable
               isSelectable
               onSelect={onSelect}

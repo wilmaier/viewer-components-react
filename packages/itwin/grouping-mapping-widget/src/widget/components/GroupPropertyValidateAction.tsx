@@ -5,8 +5,18 @@
 import { PropertyValidationClient, PropertyValidationClientOptions } from "../../property-validation-client/PropertyValidationClient";
 import { take } from "../../property-validation-client/base/iterators/IteratorUtilFunctions";
 import { EntityListIterator } from "../../property-validation-client/base/iterators/EntityListIterator";
-import { Rule, RuleTemplate, Run, RunDetails, Test } from "../../property-validation-client/base";
-import { ParamsToCreateRule, ParamsToCreateTest, ParamsToDeleteRule, ParamsToDeleteRun, ParamsToDeleteTest, ParamsToGetResult, ParamsToGetRun, ParamsToGetTemplateList, ParamsToRunTest } from "../../property-validation-client/operations";
+import { ResponseFromGetResult, Rule, RuleTemplate, Run, RunDetails, Test } from "../../property-validation-client/base";
+import {
+  ParamsToCreateRule,
+  ParamsToCreateTest,
+  ParamsToDeleteRule,
+  ParamsToDeleteRun,
+  ParamsToDeleteTest,
+  ParamsToGetResult,
+  ParamsToGetRun,
+  ParamsToGetTemplateList,
+  ParamsToRunTest,
+} from "../../property-validation-client/operations";
 import ValidateResultsTable from "./ValidateResultsTable";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
@@ -59,18 +69,18 @@ interface GroupPropertyValidateActionProps {
 
 export const validationTypeSelectionOptions: SelectOption<string>[] = [
   { value: "PropertyValueRange", label: "Range" },
-  // { value: "PropertyValueAtMost", label: "Upper Bound" },
-  // { value: "PropertyValueAtLeast", label: "Lower Bound" },
-  // { value: "PropertyValuePattern", label: "Pattern" },
-  // { value: "PropertyValueDefined", label: "Value Set" },
-  // { value: "PropertyValueUnique", label: "Value Unique" },
-  // { value: "PropertyValueCountAtLeast", label: "Count Elements Above Lower Bound" },
-  // { value: "PropertyValueCountAtMost", label: "Count Elements Below Upper Bound" },
-  // { value: "PropertyValueCountRange", label: "Count Elements in Range" },
-  // { value: "PropertyValueSumAtLeast", label: "Sum Values Above Lower Bound" },
-  // { value: "PropertyValueSumAtMost", label: "Sum Values Below Upper Bound" },
-  // { value: "PropertyValueSumRange", label: "Sum Values in Range" },
-  // { value: "PropertyValuePercentAvailable", label: "Percent of Elements With Property Set" },
+  { value: "PropertyValueAtMost", label: "Upper Bound" },
+  { value: "PropertyValueAtLeast", label: "Lower Bound" },
+  { value: "PropertyValuePattern", label: "Pattern" },
+  { value: "PropertyValueDefined", label: "Value Set" },
+  { value: "PropertyValueUnique", label: "Value Unique" },
+  { value: "PropertyValueCountAtLeast", label: "Count Elements Above Lower Bound" },
+  { value: "PropertyValueCountAtMost", label: "Count Elements Below Upper Bound" },
+  { value: "PropertyValueCountRange", label: "Count Elements in Range" },
+  { value: "PropertyValueSumAtLeast", label: "Sum Values Above Lower Bound" },
+  { value: "PropertyValueSumAtMost", label: "Sum Values Below Upper Bound" },
+  { value: "PropertyValueSumRange", label: "Sum Values in Range" },
+  { value: "PropertyValuePercentAvailable", label: "Percent of Elements With Property Set" },
 ];
 interface Property {
   name: string;
@@ -270,17 +280,15 @@ const GroupPropertyValidateAction = ({
 }: GroupPropertyValidateActionProps) => {
   const iModelConnection = useActiveIModelConnection() as IModelConnection;
   const apiContext = useContext(ApiContext);
-  const [validationType, setValidationType] = useState<string>("Range");
+  const [validationType, setValidationType] = useState<string>("");
+  const [pattern, setPattern] = useState<string>("");
   const [upperBound, setUpperBound] = useState<string>("");
   const [lowerBound, setLowerBound] = useState<string>("");
   const [ecProperties, setEcProperties] = useState<ECProperty[]>(
     []
   );
-  const [resultId, setResultId] = useState<
-  string | undefined
-  >(undefined);
-  const [propertyValidationClient, setPropertyValidationClient] = useState<
-  PropertyValidationClient | undefined
+  const [validateResults, setValidateResults] = useState<
+  ResponseFromGetResult | undefined
   >(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -359,15 +367,13 @@ const GroupPropertyValidateAction = ({
   }, [apiContext.accessToken, apiContext.prefix, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onValidate = async () => {
-    setResultId(undefined);
+    setValidateResults(undefined);
     setIsLoading(true);
     const projectId = iModelConnection.iTwinId!;
     const iModelId = iModelConnection.iModelId!;
     const options: PropertyValidationClientOptions = {};
     const accessTokenCallback = async () => apiContext.accessToken;
     const propertyValidationClient: PropertyValidationClient = new PropertyValidationClient(options, accessTokenCallback);
-    setPropertyValidationClient(propertyValidationClient);
-
     const paramsToGetTemplateList: ParamsToGetTemplateList = {
       urlParams: {
         projectId
@@ -377,7 +383,7 @@ const GroupPropertyValidateAction = ({
     const templates: RuleTemplate[] = await take(templatesIterator, 100);
     let templateId: string = "";
     for (const template of templates) {
-      if (template.displayName === "PropertyValueRange") {
+      if (template.displayName === validationType) {
         templateId = template.id;
         break;
       }
@@ -400,6 +406,7 @@ const GroupPropertyValidateAction = ({
         propertyName: ecProperty,
         upperBound,
         lowerBound,
+        pattern,
       },
     };
     const rule: Rule = await propertyValidationClient.rules.create(paramsToCreateRule);
@@ -423,11 +430,20 @@ const GroupPropertyValidateAction = ({
     const pause = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
     let runDetails: RunDetails;
     do {
-      await pause(10000);
+      await pause(5000);
       runDetails = await propertyValidationClient.runs.getSingle(paramsToGetRun);
     } while (runDetails.status !== "completed");
 
-    setResultId(runDetails.resultId);
+    const paramsToGetResult: ParamsToGetResult = {
+      resultId: runDetails.resultId,
+    };
+    const validateResults: ResponseFromGetResult = await propertyValidationClient.results.get(paramsToGetResult);
+    // Replace ruleIndex in results with rule display name
+    for (const result of validateResults.result) {
+      const index = +result.ruleIndex;
+      result.ruleIndex = validateResults.ruleList[index].displayName;
+    }
+    setValidateResults(validateResults);
 
     const paramsToDeleteRule: ParamsToDeleteRule = {
       ruleId: rule.id,
@@ -441,11 +457,18 @@ const GroupPropertyValidateAction = ({
 
     setIsLoading(false);
 
-    // const paramsToDeleteRun: ParamsToDeleteRun = {
-    //   runId: run!.id,
-    // };
-    // await propertyValidationClient.runs.delete(paramsToDeleteRun);
+    const paramsToDeleteRun: ParamsToDeleteRun = {
+      runId: run!.id,
+    };
+    await propertyValidationClient.runs.delete(paramsToDeleteRun);
   };
+
+  const showLowerBound = new Set<string>(
+    ["PropertyValueRange", "PropertyValueCountRange", "PropertyValueSumRange", "PropertyValueAtLeast", "PropertyValueCountAtLeast", "PropertyValueSumAtLeast"]
+  );
+  const showUpperBound = new Set<string>(
+    ["PropertyValueRange", "PropertyValueCountRange", "PropertyValueSumRange", "PropertyValueAtMost", "PropertyValueCountAtMost", "PropertyValueSumAtMost"]
+  );
 
   return (
     <>
@@ -468,43 +491,61 @@ const GroupPropertyValidateAction = ({
             onShow={() => { }}
             onHide={() => { }}
           />
-          <LabeledInput
-            id='lowerBound'
-            label='Lower Bound'
-            value={lowerBound}
-            required
-            disabled={isLoading}
-            onChange={(event) => {
-              setLowerBound(event.target.value);
-            }}
+          {showLowerBound.has(validationType) &&
+            <LabeledInput
+              id='lowerBound'
+              label='Lower Bound'
+              value={lowerBound}
+              required
+              disabled={isLoading}
+              onChange={(event) => {
+                setLowerBound(event.target.value);
+              }}
+            />
+          }
+          {showUpperBound.has(validationType) &&
+            <LabeledInput
+              id='upperBound'
+              label='Upper Bound'
+              value={upperBound}
+              required
+              disabled={isLoading}
+              onChange={(event) => {
+                setUpperBound(event.target.value);
+              }}
+            />}
+          {validationType === "PropertyValuePattern" &&
+            <LabeledInput
+              id='pattern'
+              label='Pattern'
+              value={pattern}
+              required
+              disabled={isLoading}
+              onChange={(event) => {
+                setPattern(event.target.value);
+              }}
+            />
+          }
+          {/* TODO: Disable when no properties are selected. Will do when I rework property selection. */}
+          <ValidateActionPanel
+            onValidate={onValidate}
+            onCancel={returnFn}
+            isLoading={isLoading}
+            isValidateDisabled={!validationType ||
+              (showLowerBound.has(validationType) && !lowerBound) ||
+              (showUpperBound.has(validationType) && !upperBound) ||
+              (validationType === "PropertyValuePattern" && !pattern)}
           />
-          <LabeledInput
-            id='upperBound'
-            label='Upper Bound'
-            value={upperBound}
-            required
-            disabled={isLoading}
-            onChange={(event) => {
-              setUpperBound(event.target.value);
-            }}
-          />
-          <Fieldset className='property-options' legend='Results'>
+          <Fieldset className='property-options'>
+            <legend>Failures {validateResults ? '('+validateResults.result.length+')': ''}</legend>
             <ValidateResultsTable
-              propertyValidationClient={propertyValidationClient!}
-              resultId={resultId}
+              validateResults={validateResults}
               isLoading={isLoading}
             />
           </Fieldset>
         </Fieldset>
       </div>
-      {/* TODO: Disable when no properties are selected. Will do when I rework property selection. */}
-      <ValidateActionPanel
-        onValidate={onValidate}
-        onCancel={returnFn}
-        isLoading={isLoading}
-        isValidateDisabled={!(validationType && lowerBound && upperBound)}
-      />
-    </>
+      </>
   );
 };
 

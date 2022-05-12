@@ -215,7 +215,7 @@ const GroupAction = ({
   return (
     <>
       <WidgetHeader
-        title={group ? group.groupName ?? "" : "Add Group"}
+        title={group ? group.groupName ?? "" : "Add Validation Group"}
         returnFn={async () => {
           Presentation.selection.clearSelection(
             "GroupingMappingWidget",

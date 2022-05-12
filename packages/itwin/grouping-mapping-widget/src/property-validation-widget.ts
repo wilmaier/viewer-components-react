@@ -3,7 +3,7 @@
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
 /** UI Provider for iTwin Viewer Applications */
-export * from "./widget/GroupingMappingWidget";
+export * from "./widget/PropertyValidationWidget";
 
 /** Internal components for custom UIs */
 export { Mappings } from "./widget/components/Mapping";

@@ -52,7 +52,17 @@ const fetchMappings = async (
   try {
     setIsLoading(true);
     const reportingClientApi = new ReportingClient(apiContext.prefix);
-    const mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
+    let mappings = await reportingClientApi.getMappings(apiContext.accessToken, iModelId);
+    if (mappings.length == 0) {
+      const mappingContainer = await reportingClientApi.createMapping(apiContext.accessToken, iModelId, {
+        mappingName: "PropertyValidation",
+        description: "Property Validation",
+      });
+      if (mappingContainer && mappingContainer.mapping) {
+        mappings.push(mappingContainer.mapping);
+      }
+    }
+
     setMappings(mappings);
   } catch (error: any) {
     handleError(error.status);

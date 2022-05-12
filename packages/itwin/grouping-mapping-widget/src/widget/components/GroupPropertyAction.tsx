@@ -504,7 +504,7 @@ const GroupPropertyAction = ({
   return (
     <>
       <WidgetHeader
-        title={groupPropertyName ?? "Add Property"}
+        title={groupPropertyName ?? "Add Validation Property"}
         returnFn={returnFn}
       />
       <div className='group-property-action-container'>

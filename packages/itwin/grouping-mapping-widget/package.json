@@ -1,25 +1,25 @@
 {
-  "name": "@itwin/grouping-mapping-widget",
+  "name": "@itwin/property-validation-widget",
   "version": "0.3.1",
-  "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Reporting Platform.",
+  "description": "An iTwin.js 3D Viewer Widget that interfaces with the iTwin Validation Platform.",
   "keywords": [
     "Bentley",
     "BIM",
     "iModel",
-    "Reporting"
+    "Validation"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/itwin/grouping-mapping-widget"
+    "url": "https://github.com/imodeljs/viewer-components-react/tree/master/packages/itwin/property-validation-widget"
   },
   "license": "MIT",
   "author": {
     "name": "Bentley Systems, Inc.",
     "url": "http://www.bentley.com"
   },
-  "main": "lib/cjs/grouping-mapping-widget.js",
-  "module": "lib/esm/grouping-mapping-widget.js",
-  "typings": "lib/cjs/grouping-mapping-widget",
+  "main": "lib/cjs/property-validation-widget.js",
+  "module": "lib/esm/property-validation-widget.js",
+  "typings": "lib/cjs/property-validation-widget",
   "scripts": {
     "build": "npm run -s dual-build && npm run -s copy:assets",
     "build:cjs": "tsc 1>&2 --outDir lib/cjs",
