@@ -10,7 +10,7 @@ import { ColorDef,  FeatureOverrideType } from "@itwin/core-common";
 import React, { useMemo, useState } from "react";
 import type { CreateTypeFromInterface } from "../utils";
 import type { CellProps } from "react-table";
-import { ResponseFromGetResult, ResultDetails } from "../../property-validation-client/base";
+import { ResponseFromGetResult, ResultDetails } from "@itwin/property-validation-client";
 import { LoadingSpinner } from "./utils";
 
 export type ValidateResultType = CreateTypeFromInterface<ResultDetails>;

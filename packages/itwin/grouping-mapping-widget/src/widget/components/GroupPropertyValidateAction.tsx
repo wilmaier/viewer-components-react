@@ -2,10 +2,10 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { PropertyValidationClient, PropertyValidationClientOptions } from "../../property-validation-client/PropertyValidationClient";
-import { take } from "../../property-validation-client/base/iterators/IteratorUtilFunctions";
-import { EntityListIterator } from "../../property-validation-client/base/iterators/EntityListIterator";
-import { ResponseFromGetResult, Rule, RuleTemplate, Run, RunDetails, Test } from "../../property-validation-client/base";
+import { PropertyValidationClient, PropertyValidationClientOptions } from "@itwin/property-validation-client";
+import { take } from "@itwin/property-validation-client";
+import { EntityListIterator } from "@itwin/property-validation-client";
+import { ResponseFromGetResult, Rule, RuleTemplate, Run, RunDetails, Test } from "@itwin/property-validation-client";
 import {
   ParamsToCreateRule,
   ParamsToCreateTest,
@@ -16,7 +16,7 @@ import {
   ParamsToGetRun,
   ParamsToGetTemplateList,
   ParamsToRunTest,
-} from "../../property-validation-client/operations";
+} from "@itwin/property-validation-client";
 import ValidateResultsTable from "./ValidateResultsTable";
 import type { IModelConnection } from "@itwin/core-frontend";
 import type {
