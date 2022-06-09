@@ -367,13 +367,21 @@ const GroupPropertyValidateAction = ({
   }, [apiContext.accessToken, apiContext.prefix, groupId, groupPropertyId, iModelConnection, iModelId, keySet, mappingId]);
 
   const onValidate = async () => {
-    setValidateResults(undefined);
     setIsLoading(true);
+    setValidateResults(undefined);
     const projectId = iModelConnection.iTwinId!;
     const iModelId = iModelConnection.iModelId!;
+    const ecProperty: string = ecProperties[0].ecPropertyName!;
+    const ecSchema: string = ecProperties[0].ecSchemaName!;
+    const ecClass: string = ecProperties[0].ecClassName!;
+
     const options: PropertyValidationClientOptions = {};
     const accessTokenCallback = async () => apiContext.accessToken;
-    const propertyValidationClient: PropertyValidationClient = new PropertyValidationClient(options, accessTokenCallback);
+
+    // 1. Initialize the Property Validation API wrapper client
+    const propertyValidationClient = new PropertyValidationClient(options, accessTokenCallback);
+
+    // 2. Lookup the template id of the selected validation function
     const paramsToGetTemplateList: ParamsToGetTemplateList = {
       urlParams: {
         projectId
@@ -389,10 +397,7 @@ const GroupPropertyValidateAction = ({
       }
     }
 
-    const ecProperty: string = ecProperties[0].ecPropertyName!;
-    const ecSchema: string = ecProperties[0].ecSchemaName!;
-    const ecClass: string = ecProperties[0].ecClassName!;
-
+    // 3. Create a property validation rule for the selected property
     const paramsToCreateRule: ParamsToCreateRule = {
       templateId,
       displayName: "GMTestRule1",
@@ -410,6 +415,8 @@ const GroupPropertyValidateAction = ({
       },
     };
     const rule: Rule = await propertyValidationClient.rules.create(paramsToCreateRule);
+
+    // 4. Create a property validation test to apply the new rule
     const paramsToCreateTest: ParamsToCreateTest = {
       projectId,
       displayName: "GMTest1",
@@ -419,6 +426,7 @@ const GroupPropertyValidateAction = ({
     };
     const test: Test = await propertyValidationClient.tests.create(paramsToCreateTest);
 
+    // 5. Run the new test and poll for a completed status
     const paramsToRunTest: ParamsToRunTest = {
       testId: test.id,
       iModelId,
@@ -434,17 +442,18 @@ const GroupPropertyValidateAction = ({
       runDetails = await propertyValidationClient.runs.getSingle(paramsToGetRun);
     } while (runDetails.status !== "completed");
 
+    // 6. Get the list of validation failures
     const paramsToGetResult: ParamsToGetResult = {
       resultId: runDetails.resultId,
     };
     const validateResults: ResponseFromGetResult = await propertyValidationClient.results.get(paramsToGetResult);
-    // Replace ruleIndex in results with rule display name
     for (const result of validateResults.result) {
       const index = +result.ruleIndex;
       result.ruleIndex = validateResults.ruleList[index].displayName;
     }
     setValidateResults(validateResults);
 
+    // 7. Cleanup the rule, test, and results
     const paramsToDeleteRule: ParamsToDeleteRule = {
       ruleId: rule.id,
     };

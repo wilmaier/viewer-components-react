@@ -458,8 +458,9 @@ const GroupPropertyAction = ({
       // Unique types
       let type = "";
       switch (property.type) {
+        case "int":
         case "long":
-          type = "integer";
+          type = "Number";
           break;
         default:
           type = property.type;
