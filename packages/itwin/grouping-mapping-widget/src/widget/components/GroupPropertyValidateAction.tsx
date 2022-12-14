@@ -2,11 +2,9 @@
 * Copyright (c) Bentley Systems, Incorporated. All rights reserved.
 * See LICENSE.md in the project root for license terms and full copyright notice.
 *--------------------------------------------------------------------------------------------*/
-import { PropertyValidationClient, PropertyValidationClientOptions } from "@itwin/property-validation-client";
-import { take } from "@itwin/property-validation-client";
-import { EntityListIterator } from "@itwin/property-validation-client";
-import { ResponseFromGetResult, Rule, RuleTemplate, Run, RunDetails, Test } from "@itwin/property-validation-client";
-import {
+import { AxiosRestClient } from "@itwin/imodels-client-management";
+import { PropertyValidationClient, take } from "@itwin/property-validation-client";
+import type { EntityListIterator,
   ParamsToCreateRule,
   ParamsToCreateTest,
   ParamsToDeleteRule,
@@ -16,6 +14,13 @@ import {
   ParamsToGetRun,
   ParamsToGetTemplateList,
   ParamsToRunTest,
+  PropertyValidationClientOptions,
+  ResponseFromGetResult,
+  Rule,
+  RuleTemplate,
+  Run,
+  RunDetails,
+  Test,
 } from "@itwin/property-validation-client";
 import ValidateResultsTable from "./ValidateResultsTable";
 import type { IModelConnection } from "@itwin/core-frontend";
@@ -372,8 +377,6 @@ const GroupPropertyValidateAction = ({
     const projectId = iModelConnection.iTwinId!;
     const iModelId = iModelConnection.iModelId!;
     const ecProperty: string = ecProperties[0].ecPropertyName!;
-    const ecSchema: string = ecProperties[0].ecSchemaName!;
-    const ecClass: string = ecProperties[0].ecClassName!;
 
     const options: PropertyValidationClientOptions = {};
     const accessTokenCallback = async () => apiContext.accessToken;
@@ -390,28 +393,38 @@ const GroupPropertyValidateAction = ({
     const templatesIterator: EntityListIterator<RuleTemplate> = propertyValidationClient.templates.getList(paramsToGetTemplateList);
     const templates: RuleTemplate[] = await take(templatesIterator, 100);
     let templateId: string = "";
+    let mpTemplateId: string = "";
     for (const template of templates) {
       if (template.displayName === validationType) {
         templateId = template.id;
+      } else if (template.displayName === "MultiPropertyValidation") {
+        mpTemplateId = template.id;
         break;
       }
     }
 
+    const restClient = new AxiosRestClient();
+    const url = `https://api.bentley.com/validation/propertyValue/properties/imodels/${iModelId}?projectId=${projectId}&filter=${ecProperty}`;
+    const headers = {
+      Authorization: apiContext.accessToken,
+      Accept: "application/vnd.bentley.itwin-platform.v1+json",
+    };
+    const properties: any = await restClient.sendGetRequest({ url, headers });
+
     // 3. Create a property validation rule for the selected property
     const paramsToCreateRule: ParamsToCreateRule = {
-      templateId,
+      templateId: mpTemplateId,
       displayName: "GMTestRule1",
       description: "G&M Test rule 1",
       severity: "medium",
-      ecSchema,
-      ecClass,
+      ecSchema: "*",
+      ecClass: "*",
       whereClause: "",
       dataType: "property",
       functionParameters: {
-        propertyName: ecProperty,
-        upperBound,
-        lowerBound,
-        pattern,
+        templateId,
+        functionParameters: JSON.stringify({ propertyName: ecProperty, upperBound, lowerBound, pattern }),
+        schemas: properties.data.searchProperty.schemas,
       },
     };
     const rule: Rule = await propertyValidationClient.rules.create(paramsToCreateRule);
