@@ -5,7 +5,6 @@
 import { AxiosRestClient } from "@itwin/imodels-client-management";
 import { PropertyValidationClient, take } from "@itwin/property-validation-client";
 import type { EntityListIterator,
-  ParamsToCreateRule,
   ParamsToCreateTest,
   ParamsToDeleteRule,
   ParamsToDeleteRun,
@@ -399,7 +398,6 @@ const GroupPropertyValidateAction = ({
         templateId = template.id;
       } else if (template.displayName === "MultiPropertyValidation") {
         mpTemplateId = template.id;
-        break;
       }
     }
 
@@ -412,7 +410,7 @@ const GroupPropertyValidateAction = ({
     const properties: any = await restClient.sendGetRequest({ url, headers });
 
     // 3. Create a property validation rule for the selected property
-    const paramsToCreateRule: ParamsToCreateRule = {
+    const paramsToCreateRule: any = {
       templateId: mpTemplateId,
       displayName: "GMTestRule1",
       description: "G&M Test rule 1",
@@ -423,7 +421,7 @@ const GroupPropertyValidateAction = ({
       dataType: "property",
       functionParameters: {
         templateId,
-        functionParameters: JSON.stringify({ propertyName: ecProperty, upperBound, lowerBound, pattern }),
+        functionParameters: { propertyName: ecProperty, upperBound, lowerBound, pattern },
         schemas: properties.data.searchProperty.schemas,
       },
     };
